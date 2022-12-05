@@ -11,10 +11,10 @@ fn main() {
     let mut crates: Vec<&str> = split[0].split("\n").collect();
     let assignments: Vec<&str> = split[1].split("\n").collect();
 
-    // Pop crate amount line from input crates and save the last crate number
-    let max_crate_number = crates
+    // Pop stack amount line from input crates and save the last number
+    let stack_amount = crates
         .pop()
-        .expect("Should be a crate amount line")
+        .expect("Should be a stack amount line")
         .chars()
         .last()
         .expect("Should have a last letter")
@@ -22,9 +22,9 @@ fn main() {
         .expect("Should be a digit");
 
     // Initialize Vector of empty VecDeques according to the amount of crate stacks
-    // Ex. if max_crate_number is 4 = [[], [], [], []]
+    // Ex. if stack_amount is 4 = [[], [], [], []]
     let mut stacks: Vec<VecDeque<&str>> = Vec::new();
-    for _ in 0..max_crate_number {
+    for _ in 0..stack_amount {
         stacks.push(VecDeque::new());
     }
 
@@ -85,11 +85,6 @@ fn perform_assignments(
         }
     });
 
-    // Save first element of each stack to a result string
-    let mut result: String = String::new();
-    for stack in &stacks {
-        result.push_str(stack[0]);
-    }
-
-    result
+    // Return a String containing the first element of each stack of crates
+    stacks.iter().map(|s| s[0]).collect()
 }
