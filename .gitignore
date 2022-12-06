@@ -3,3 +3,6 @@
 
 # Rust files
 /target
+
+# Vimspector
+.vimspector.json
