@@ -3,7 +3,7 @@ use std::str::Chars;
 
 
 fn main() {
-    println!("--- Day 5: Supply Stacks ---");
+    println!("--- Day 6: Tuning Trouble ---");
     let input: String = fs::read_to_string("./src/day6/input.txt").expect("File should exist");
 
     let characters: Chars = input.chars();
@@ -15,23 +15,22 @@ fn main() {
     println!("Part Two: {}", part2);
 }
 
-fn find_marker(characters: Chars, distinct_marker: usize) -> String {
+fn find_marker(characters: Chars, distinct_amount: usize) -> String {
     let mut result: String = String::new();
 
-    let mut curr_set: Vec<char> = Vec::new();
+    let mut set: Vec<char> = Vec::new();
     characters.enumerate().for_each(| (i, character) | {
-        if i > distinct_marker - 1 {
-            curr_set.pop();
+        if i > distinct_amount - 1 {
+            set.pop();
         };
 
-        curr_set.insert(0, character);
+        set.insert(0, character);
         
-        let mut dedupped = curr_set.clone();
-        dedupped.sort();
-        dedupped.dedup();
+        let mut dedupped_set = set.clone();
+        dedupped_set.sort();
+        dedupped_set.dedup();
         
-        if dedupped.len() == distinct_marker && result.is_empty() {
-            println!("Four different characters occurred at {}", i + 1);
+        if dedupped_set.len() == distinct_amount && result.is_empty() {
             result = (i + 1).to_string();
         }
     });
