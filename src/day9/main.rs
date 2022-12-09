@@ -9,7 +9,20 @@ fn main() {
 
     let mut head_position: Position = (0, 0);
     let mut tail_position: Position = (0, 0);
-    let mut visited_positions: HashSet<Position> = HashSet::new();
+    let mut tail_visited_positions: HashSet<Position> = HashSet::new();
+
+    let mut knot_positions: Vec<Position> = vec![
+        (0, 0),
+        (0, 0),
+        (0, 0),
+        (0, 0),
+        (0, 0),
+        (0, 0),
+        (0, 0),
+        (0, 0),
+        (0, 0),
+    ];
+    let mut last_knot_visited_positions: HashSet<Position> = HashSet::new();
 
     input.lines().for_each(|line| {
         let split = line.split_whitespace().collect::<Vec<&str>>();
@@ -25,15 +38,36 @@ fn main() {
                 _ => {}
             }
 
-            move_tail_to_head(&mut tail_position, &mut head_position);
-            visited_positions.insert(tail_position);
+            // Part One
+            // Move rope with just a head and tail
+            move_to(&mut tail_position, &head_position);
+
+            // Keep track of positions the tail visited
+            tail_visited_positions.insert(tail_position);
+
+            // Part Two
+            // Move rope with 9 knots
+            let mut previous_position = head_position;
+            knot_positions.iter_mut().for_each(|knot| {
+                move_to(knot, &previous_position);
+                previous_position = knot.clone();
+            });
+
+            // Keep track of positions the last knot visited
+            last_knot_visited_positions.insert(
+                knot_positions
+                    .last()
+                    .expect("Should have a last position")
+                    .clone(),
+            );
         }
     });
 
-    println!("Part 1: {}", visited_positions.len());
+    println!("Part 1: {}", tail_visited_positions.len());
+    println!("Part 2: {}", last_knot_visited_positions.len());
 }
 
-fn move_tail_to_head(tail_position: &mut Position, head_position: &mut Position) {
+fn move_to(tail_position: &mut Position, head_position: &Position) {
     // Get X-axis difference between head and tail positions
     let x_diff: isize = head_position.0 - tail_position.0;
     // Get Y-axis difference between head and tail positions
