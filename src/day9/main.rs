@@ -40,8 +40,7 @@ fn main() {
 
             // Part One
             // Move rope with just a head and tail
-            move_to(&mut tail_position, &head_position);
-
+            follow(&mut tail_position, &head_position);
             // Keep track of positions the tail visited
             tail_visited_positions.insert(tail_position);
 
@@ -49,10 +48,9 @@ fn main() {
             // Move rope with 9 knots
             let mut previous_position = head_position;
             knot_positions.iter_mut().for_each(|knot| {
-                move_to(knot, &previous_position);
+                follow(knot, &previous_position);
                 previous_position = knot.clone();
             });
-
             // Keep track of positions the last knot visited
             last_knot_visited_positions.insert(
                 knot_positions
@@ -67,43 +65,43 @@ fn main() {
     println!("Part 2: {}", last_knot_visited_positions.len());
 }
 
-fn move_to(tail_position: &mut Position, head_position: &Position) {
-    // Get X-axis difference between head and tail positions
-    let x_diff: isize = head_position.0 - tail_position.0;
-    // Get Y-axis difference between head and tail positions
-    let y_diff: isize = head_position.1 - tail_position.1;
+fn follow(from_pos: &mut Position, to_pos: &Position) {
+    // Get X-axis difference between to and from positions
+    let x_diff: isize = to_pos.0 - from_pos.0;
+    // Get Y-axis difference between to and from positions
+    let y_diff: isize = to_pos.1 - from_pos.1;
 
-    // X difference bigger or less than 1 indicates tail needs to move on Y
+    // X difference bigger or less than 1 indicates from_pos needs to move on Y
     if x_diff > 1 || x_diff < -1 {
-        // X difference bigger than 1, tail should move towards the right
+        // X difference bigger than 1, from_pos should move towards the right
         if x_diff > 1 {
-            tail_position.0 += 1;
-        // X difference less than -1, tail should move towards the left
+            from_pos.0 += 1;
+        // X difference less than -1, from_pos should move towards the left
         } else if x_diff < -1 {
-            tail_position.0 -= 1;
+            from_pos.0 -= 1;
         }
 
         // Next to a Y-axis difference, there's also a X-axis difference
-        // of 1 or -1, tail should move diagonally
+        // of 1 or -1, from_pos should move diagonally
         if y_diff == 1 || y_diff == -1 {
-            tail_position.1 += y_diff;
+            from_pos.1 += y_diff;
         }
     }
 
-    // Y difference bigger or less than 1 indicates tail needs to move on Y
+    // Y difference bigger or less than 1 indicates from_pos needs to move on Y
     if y_diff > 1 || y_diff < -1 {
-        // Y difference bigger than 1, tail should move towards the right
+        // Y difference bigger than 1, from_pos should move towards the right
         if y_diff > 1 {
-            tail_position.1 += 1;
-        // Y difference less than -1, tail should move towards the left
+            from_pos.1 += 1;
+        // Y difference less than -1, from_pos should move towards the left
         } else if y_diff < -1 {
-            tail_position.1 -= 1;
+            from_pos.1 -= 1;
         }
 
         // Next to a X-axis difference, there's also a Y-axis difference
-        // of 1 or -1, tail should move diagonally
+        // of 1 or -1, from_pos should move diagonally
         if x_diff == 1 || x_diff == -1 {
-            tail_position.0 += x_diff;
+            from_pos.0 += x_diff;
         }
     }
 }
