@@ -40,5 +40,9 @@ path = "./src/day8/main.rs"
 name = "day9"
 path = "./src/day9/main.rs"
 
+[[bin]]
+name = "day10"
+path = "./src/day10/main.rs"
+
 [dependencies]
 regex = "1"
