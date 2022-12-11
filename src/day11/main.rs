@@ -2,7 +2,7 @@ use regex::Regex;
 use std::collections::HashMap;
 use std::fs;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 struct Monkey {
     id: usize,
     items: Vec<usize>,
@@ -20,12 +20,27 @@ fn main() {
 
     let input: String = fs::read_to_string("./src/day11/input.txt").expect("File should exist");
 
+    let mut modulus: usize = 1;
     input.split("\n\n").for_each(|monkey_input| {
         let monkey = parse_monkey(monkey_input);
+        modulus *= monkey.divisibility_test;
         monkeys.insert(monkey.id, monkey);
     });
 
-    for _ in 0..20 {
+    let mut monkeys_pt2: HashMap<usize, Monkey> = HashMap::new();
+    monkeys_pt2.clone_from(&monkeys);
+
+    // Part One
+    println!("Part One:");
+    play(&mut monkeys, 20, false, 0);
+
+    // Part Two
+    println!("Part Two:");
+    play(&mut monkeys_pt2, 10000, true, modulus);
+}
+
+fn play(monkeys: &mut HashMap<usize, Monkey>, rounds: usize, pt2: bool, modulus: usize) {
+    for _ in 0..rounds {
         for i in 0..monkeys.len() {
             let monkey = monkeys.get_mut(&i).unwrap();
 
@@ -61,8 +76,13 @@ fn main() {
                     _ => {}
                 }
 
-                // Divide worry level by 3
-                worry_level /= 3;
+                if !pt2 {
+                    // Divide worry level by 3
+                    worry_level /= 3;
+                } else {
+                    // Modular worry level reduction
+                    worry_level = worry_level % modulus
+                }
 
                 // Test item's worry level divisibility
                 if worry_level % monkey.divisibility_test == 0 {
@@ -93,10 +113,7 @@ fn main() {
     number_of_inspects.sort();
     number_of_inspects.reverse();
 
-    println!(
-        "Part One: {}",
-        number_of_inspects[0] * number_of_inspects[1]
-    );
+    println!("{}", number_of_inspects[0] * number_of_inspects[1]);
 }
 
 fn parse_monkey(monkey_input: &str) -> Monkey {
