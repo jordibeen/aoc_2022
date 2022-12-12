@@ -33,16 +33,31 @@ fn main() {
         });
     });
 
+    let pt1 = find_shortest_path(&grid, start_position, end_position, false).unwrap();
+    println!("Part One: {:?}", pt1.len());
+    let pt2 = find_shortest_path(&grid, start_position, end_position, true).unwrap();
+    println!("Part Two: {:?}", pt2.len());
+}
+
+fn find_shortest_path(
+    grid: &Vec<Vec<Position>>,
+    start_position: Position,
+    end_position: Position,
+    pt2: bool,
+) -> Option<Vec<Position>> {
     let mut queue: VecDeque<(Position, Vec<Position>)> = VecDeque::new();
     let mut visited: Vec<Position> = Vec::new();
-    let mut shortest_path: Vec<Position> = Vec::new();
 
-    queue.push_back((start_position, Vec::new()));
+    // We start at the ending position
+    queue.push_back((end_position, Vec::new()));
 
     while let Some((position, path)) = queue.pop_front() {
-        if position == end_position {
-            shortest_path = path.to_owned();
-            break;
+        // If we reach the starting position, we return the current path length
+        if position == start_position {
+            return Some(path);
+        // In part two, we need to return after reaching the first position with a height of 0
+        } else if pt2 && position.2 == 0 {
+            return Some(path);
         }
 
         // Define neighbours
@@ -71,7 +86,7 @@ fn main() {
         // Filter neighbours to unvisited and equal or one increment in height
         let unexplored_neighbours: Vec<Position> = neighbours
             .into_iter()
-            .filter(|neighbour| neighbour.2 <= (position.2 + 1) && !visited.contains(neighbour))
+            .filter(|neighbour| neighbour.2 >= (position.2 - 1) && !visited.contains(neighbour))
             .collect::<Vec<Position>>();
 
         // Push unexplored neighbour to the back of the queue
@@ -84,6 +99,5 @@ fn main() {
         });
     }
 
-    // Part One
-    println!("Part One: {:?}", shortest_path.len());
+    return None;
 }
