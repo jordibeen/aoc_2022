@@ -6,6 +6,7 @@ fn main() {
 
     let input: String = fs::read_to_string("./src/day13/input.txt").expect("File should exist");
 
+    // Part One: Keeping track of correctly ordered left/right pairs
     let mut correct_indices: Vec<usize> = Vec::new();
     input
         .split("\n\n")
@@ -22,8 +23,30 @@ fn main() {
                 }
             }
         });
-
     println!("Part One: {:?}", correct_indices.iter().sum::<usize>());
+
+    // Part Two: Parse all packets instead of left/right pairs
+    let mut packets: Vec<Vec<Value>> = Vec::new();
+    input.lines().for_each(|line| {
+        if !line.is_empty() {
+            let pair: Vec<Value> = serde_json::from_str(line).unwrap();
+            packets.push(pair);
+        }
+    });
+    let divider_packet_1: Vec<Value> = serde_json::from_str("[[2]]").unwrap();
+    let divider_packet_2: Vec<Value> = serde_json::from_str("[[6]]").unwrap();
+    packets.push(divider_packet_1.clone());
+    packets.push(divider_packet_2.clone());
+
+    organize_packets(&mut packets);
+
+    let mut divider_indices: Vec<usize> = Vec::new();
+    for (i, packet) in packets.iter().enumerate() {
+        if packet == &divider_packet_1 || packet == &divider_packet_2 {
+            divider_indices.push(i + 1);
+        }
+    }
+    println!("Part Two: {:?}", divider_indices.iter().product::<usize>());
 }
 
 fn check_in_order(left_pair: &Vec<Value>, right_pair: &Vec<Value>) -> Option<bool> {
@@ -85,4 +108,33 @@ fn check_in_order(left_pair: &Vec<Value>, right_pair: &Vec<Value>) -> Option<boo
 
     // No confirmation, continue
     None
+}
+
+fn organize_packets(packets: &mut Vec<Vec<Value>>) {
+    let mut organized: bool = false;
+
+    // Keep looping as long as the set isn't organized
+    while !organized {
+        // Initialize empty list of booleans
+        let mut fully_organized: Vec<bool> = Vec::new();
+        for i in 0..packets.len() - 1 {
+            let right_packet = &packets[i + 1].to_owned();
+            if let Some(in_order) = check_in_order(&packets[i], &packets[i + 1]) {
+                // If the current and next packet are ordered correctly, we push it to our boolean list
+                if in_order {
+                    fully_organized.push(true);
+                // If the current and next packet are NOT ordered, we swap them around
+                // in our packet array, and save that the list isn't fully ordered yet
+                } else {
+                    let _ = &packets.remove(i + 1);
+                    let _ = &packets.insert(i, right_packet.to_owned());
+                    fully_organized.push(false);
+                }
+            }
+        }
+        // If there's no unorganized records, we consider the packets to be organized
+        if !fully_organized.contains(&false) {
+            organized = true;
+        }
+    }
 }
