@@ -5,9 +5,12 @@ use std::fs;
 // Eg. (494, 7)
 type Position = (usize, usize);
 
-#[derive(Debug)]
+// Dimension is a tuple containing (x-min, x-max, y-min, y-max)
+// Eg. (480, 520, 0, 9)
+type Dimension = (usize, usize, usize, usize);
+
+#[derive(Clone, Debug)]
 enum Occupation {
-    Air,
     Rock,
     Sand,
 }
@@ -21,7 +24,7 @@ fn main() {
 
     // Keeping track of grid dimensions (x-min, x-max, y-min, y-max)
     // Eg. (494, 503, 0, 9)
-    let mut dimensions: (usize, usize, usize, usize) = (0, 0, 0, 0);
+    let mut dimension: Dimension = (0, 0, 0, 0);
 
     let input: String = fs::read_to_string("./src/day14/input.txt").expect("File should exist");
 
@@ -66,19 +69,43 @@ fn main() {
             previous_point = Some((x, y));
 
             // Save dimensions
-            if x < dimensions.0 || dimensions.0 == 0 {
-                dimensions.0 = x;
+            if x < dimension.0 || dimension.0 == 0 {
+                dimension.0 = x;
             }
-            if x > dimensions.1 {
-                dimensions.1 = x;
+            if x > dimension.1 {
+                dimension.1 = x;
             }
-            if y > dimensions.3 {
-                dimensions.3 = y
+            if y > dimension.3 {
+                dimension.3 = y
             }
         });
     });
 
+    // Copy initial occuation state for part 2
+    let mut occupation_pt2: HashMap<Position, Occupation> = HashMap::new();
+    occupation_pt2.clone_from(&occupation);
+
     // Part 1
+    let pt1 = pour_sand(&mut occupation, dimension, false);
+    println!("Part One: {}", pt1);
+
+    // Part 2
+    dimension.0 = 0;
+    dimension.1 = 1000;
+    dimension.3 += 2;
+    (dimension.0..dimension.1).for_each(|x| {
+        occupation_pt2.insert((x, dimension.3), Occupation::Rock);
+    });
+
+    let pt2: usize = pour_sand(&mut occupation_pt2, dimension, true);
+    println!("Part Two: {}", pt2);
+}
+
+fn pour_sand(
+    occupation: &mut HashMap<Position, Occupation>,
+    dimension: Dimension,
+    pt2: bool,
+) -> usize {
     let mut unit_count: usize = 0;
     let mut abyss_reached: bool = false;
     while !abyss_reached {
@@ -86,6 +113,12 @@ fn main() {
         let mut sand_position: Position = (500, 0);
         let mut sand_falling: bool = true;
         while sand_falling {
+            if pt2 {
+                if occupation.get(&(500, 0)).is_some() {
+                    sand_falling = false;
+                    abyss_reached = true;
+                };
+            }
             let below_position: Position = (sand_position.0, sand_position.1 + 1);
             let below_left_position: Position = (sand_position.0 - 1, sand_position.1 + 1);
             let below_right_position: Position = (sand_position.0 + 1, sand_position.1 + 1);
@@ -103,25 +136,15 @@ fn main() {
                 sand_position.1 += 1;
             }
 
-            if sand_position.1 > dimensions.3 {
-                sand_falling = false;
-                abyss_reached = true;
+            if !pt2 {
+                if sand_position.1 > dimension.3 {
+                    sand_falling = false;
+                    abyss_reached = true;
+                }
             }
         }
         occupation.insert(sand_position, Occupation::Sand);
     }
-    println!("Part One: {}", unit_count - 1);
 
-    // // Draw
-    // for y in dimensions.2..dimensions.3 + 1 {
-    //     for x in dimensions.0..dimensions.1 + 1 {
-    //         match occupation.get(&(x, y)) {
-    //             Some(Occupation::Air) => print!("."),
-    //             Some(Occupation::Rock) => print!("#"),
-    //             Some(Occupation::Sand) => print!("o"),
-    //             None => print!("."),
-    //         }
-    //     }
-    //     print!("\n");
-    // }
+    unit_count - 1
 }
